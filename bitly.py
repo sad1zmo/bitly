@@ -1,17 +1,12 @@
 import sys
+import os
 import requests
 from urllib.parse import urlparse
 import json
 import re
 import bitly_token
+from dotenv import load_dotenv
 
-access_token = bitly_token.access_token
-create_bitlinks_url = "https://api-ssl.bitly.com/v4/bitlinks"
-
-
-def is_valid_url(url):
-    regex = r"(https?://)([a-zA-Z0-9_\-.]+)([a-zA-Z0-9/\-._~:/?#[\]@!$&'()*+,;=]+)?"
-    return bool(re.match(regex, url))
 
 def shorten_link(token, url):
   
@@ -20,26 +15,15 @@ def shorten_link(token, url):
         "Content-Type": "application/json",
     }
     data = {
-        "long_url": f"{url}"
+        "long_url": url
     }
 
     response = requests.post(
-        "https://api-ssl.bitly.com/v4/bitlinks", headers=headers, data=json.dumps(data)
+        create_bitlinks_url, headers=headers, json=data
     )
     
     response.raise_for_status()
     return response.json().get('link')
-
-# Check URL 
-while True:
-    url_for_verification = input("Enter your URL address: ")
-    if is_valid_url(url_for_verification):
-        break
-    else:
-        print(f"Yours URL '{url_for_verification}' doesn't valid, chage it.")
-
-parsed_url = urlparse(url_for_verification)
-count_clicks_url = f"https://api-ssl.bitly.com/v4/bitlinks/{parsed_url.hostname}{parsed_url.path}/clicks/summary"
 
 def count_clicks(token, url):
     headers = {
@@ -51,23 +35,45 @@ def count_clicks(token, url):
     'units': '-1',
     }
     
-    try:
-        clicks_count = requests.get(url, headers=headers, params=params)
-        clicks_count.raise_for_status()
-        return clicks_count
-    except requests.exceptions.HTTPError as http_err:
-        print(f'HTTP error occurred: {http_err}')
-    except requests.exceptions.RequestException as req_err:
-        print(f'Request error occurred: {req_err}')
-    except Exception as err:
-        print(f'Other error occurred: {err}')
+    clicks_count = requests.get(url, headers=headers, params=params)
+    clicks_count.raise_for_status()
+    return clicks_count
 
-def is_bitlink(url):
-    if parsed_url.hostname != "bit.ly":
-        print(url)
-        print('bitlink', shorten_link(access_token, url))
-    else:
-        count_clicks(access_token, count_clicks_url)
+def is_bitlink(token, url):
+    headers = {
+        'Authorization': f'Bearer {token}',
+    }
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        return True
+    except requests.RequestException:
+        return False
         
 if __name__ == '__main__':
-    is_bitlink(url_for_verification)
+    load_dotenv()
+    access_token = os.getenv("BITLY_ACCESS_TOKEN")
+    create_bitlinks_url = "https://api-ssl.bitly.com/v4/bitlinks"
+
+    while True:
+        url_for_verification = input("Enter your URL address: ")
+        try:
+            response = requests.get(url_for_verification)
+            response.raise_for_status()
+            break
+        except requests.RequestException:
+            print(f"Yours URL '{url_for_verification}' doesn't valid, change it.")
+
+    parsed_url = urlparse(url_for_verification)
+    count_clicks_url = f"https://api-ssl.bitly.com/v4/bitlinks/{parsed_url.hostname}{parsed_url.path}/clicks/summary"
+    bitlink_info = f"https://api-ssl.bitly.com/v4/bitlinks/{parsed_url.hostname}{parsed_url.path}"
+
+    chek_url_result = is_bitlink(access_token, bitlink_info)
+
+    if chek_url_result:
+        try:
+            print(count_clicks(access_token, count_clicks_url))
+        except requests.RequestException as e:
+            print(e)
+    else:
+        print(f"Bitlink:  {shorten_link(access_token, url_for_verification)}")
