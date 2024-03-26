@@ -19,7 +19,7 @@ def shorten_link(token, url):
     )
 
     response.raise_for_status()
-    return response.json().get('link')
+    return response.json().get("link")
 
 
 def count_clicks(token, url):
@@ -28,12 +28,12 @@ def count_clicks(token, url):
         f"{parsed_url.path}/clicks/summary"
 
     headers = {
-        'Authorization': f'Bearer {token}',
+        "Authorization": f"Bearer {token}",
     }
 
     params = {
-        'unit': 'day',
-        'units': '-1',
+        "unit": "day",
+        "units": "-1",
     }
 
     clicks_count = requests.get(count_clicks_url, headers=headers,
@@ -48,7 +48,7 @@ def is_bitlink(token, url):
         f"{parsed_url.hostname}{parsed_url.path}"
 
     headers = {
-        'Authorization': f'Bearer {token}',
+        "Authorization": f"Bearer {token}",
     }
 
     response = requests.get(return_bitlink_information_url, headers=headers)
