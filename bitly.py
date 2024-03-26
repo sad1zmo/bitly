@@ -43,12 +43,9 @@ def is_bitlink(token, url):
     headers = {
         'Authorization': f'Bearer {token}',
     }
-    try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        return True
-    except requests.RequestException:
-        return False
+
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
         
 if __name__ == '__main__':
     load_dotenv()
@@ -68,7 +65,12 @@ if __name__ == '__main__':
     count_clicks_url = f"https://api-ssl.bitly.com/v4/bitlinks/{parsed_url.hostname}{parsed_url.path}/clicks/summary"
     bitlink_info = f"https://api-ssl.bitly.com/v4/bitlinks/{parsed_url.hostname}{parsed_url.path}"
 
-    chek_url_result = is_bitlink(access_token, bitlink_info)
+    try:
+        is_bitlink(access_token, bitlink_info)
+        chek_url_result = True
+    except requests.RequestException as e:
+        chek_url_result = False
+        print(e)
 
     if chek_url_result:
         try:
