@@ -33,22 +33,21 @@
 1. Создание Bitlink:
 
     ```
-    python bitlink.py -l http://mail.ru http://google.com
-    python bitlink.py --list http://mail.ru http://google.com
+    python bitlink.py -l http://mail.ru
+    python bitlink.py --list http://mail.ru
     ```
 
-    В скрипт можно передать сколько угодно парметров с URL адресами и на выходе вы получите короткую ссылку (bitlink) с помощью сервиса Bitly и выведет ее в консоль.
+    В скрипт можно передать только один параметр с URL адресом и на выходе вы получите короткую ссылку (bitlink) с помощью сервиса Bitly и выведет ее в консоль.
 
     ```
     Bitlink for http://mail.ru:  https://bit.ly/4cHOOBQ
-    Bitlink for http://google.com:  https://bit.ly/3xoLtao
     ```
     
 
 2. Проверка статистики кликов:
 
     ```
-    bin/python bitly.py -l https://bit.ly/4cHOOBQ https://bit.ly/3xoLtao
+    bin/python bitly.py -l https://bit.ly/4cHOOBQ
     ```
 
     Если по какой-то причине параметры забыли указать скрипт запросит у вас ввести URL-адрес. После ввода он создаст короткую ссылку (bitlink) с помощью сервиса Bitly и выведет ее в консоль или посчитает количество кликов если это (bitlink).

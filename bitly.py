@@ -11,7 +11,7 @@ def create_parser():
     parser = argparse.ArgumentParser(
         description="передача ссылок пользователем"
     )
-    parser.add_argument("-l", "--links", nargs="+", default=[])
+    parser.add_argument("-l", "--link", nargs="?")
 
     return parser
 
@@ -69,22 +69,21 @@ def main():
     load_dotenv()
     access_token = os.environ["BITLY_ACCESS_TOKEN"]
     args = create_parser().parse_args()
-    if not args.links:
+    url_for_verification = args.link
+    if not args.link:
         url_for_verification = input("Enter your URL address: ")
-        args.links.append(url_for_verification)
-    for url_for_verification in args.links:
-        if is_bitlink(access_token, url_for_verification):
-            try:
-                print(count_clicks(access_token, url_for_verification))
-            except requests.RequestException as e:
-                print(e)
-        else:
-            try:
-                print(f"Bitlink for {url_for_verification}:  {shorten_link(
-                    access_token, url_for_verification
-                )}")
-            except requests.RequestException as e:
-                print(e)
+    if is_bitlink(access_token, url_for_verification):
+        try:
+            print(count_clicks(access_token, url_for_verification))
+        except requests.RequestException as e:
+            print(e)
+    else:
+        try:
+            print(f"Bitlink for {url_for_verification}:  {shorten_link(
+                access_token, url_for_verification
+            )}")
+        except requests.RequestException as e:
+            print(e)
 
 
 if __name__ == '__main__':
